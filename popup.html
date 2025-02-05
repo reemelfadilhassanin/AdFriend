@@ -1,34 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AdFriend</title>
-  <link rel="stylesheet" href="./styles/popup.css">
-</head>
-<body>
-  <div class="popup-container">
-    <h1>AdFriend</h1>
-    <p>Transform ads into positivity!</p>
-    
-    <div id="status">
-      <h2>Status: <span id="status-text">Enabled</span></h2>
-      <button id="toggleAdBlocker">Disable Ad Blocker</button>
-    </div>
+<html>
+  <head>
+    <title>AdFriend</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 10px; width: 200px; }
+      button { margin: 5px 0; padding: 5px 10px; font-size: 14px; }
+    </style>
+  </head>
+  <body>
+    <h3>AdFriend</h3>
+    <button id="enable">Enable Ad-Blocking</button>
+    <button id="disable">Disable Ad-Blocking</button>
 
-    <div id="info">
-      <p><strong>Tips:</strong></p>
-      <ul>
-        <li>Stay active: "Have you done your burpees today?"</li>
-        <li>Take a break: "Stretch and clear your mind!"</li>
-      </ul>
-    </div>
+    <script>
+      // Send messages to the background script to enable/disable ad-blocking
+      document.getElementById('enable').addEventListener('click', () => {
+        chrome.runtime.sendMessage({ action: 'enable' });
+      });
 
-    <footer>
-      <p>Powered by AdFriend</p>
-    </footer>
-  </div>
-
-  <script src="popup.js"></script>
-</body>
+      document.getElementById('disable').addEventListener('click', () => {
+        chrome.runtime.sendMessage({ action: 'disable' });
+      });
+    </script>
+  </body>
 </html>
