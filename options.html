@@ -1,0 +1,38 @@
+<!-- options.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AdFriend Settings</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; }
+    label { display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h3>AdFriend Settings</h3>
+  <label>
+    <input type="checkbox" id="motivational" checked> Motivational Quotes
+  </label>
+  <label>
+    <input type="checkbox" id="healthReminders" checked> Health Reminders
+  </label>
+  <label>
+    <input type="checkbox" id="productivityTips" checked> Productivity Tips
+  </label>
+  <button id="savePreferences">Save Preferences</button>
+
+  <script>
+    document.getElementById('savePreferences').addEventListener('click', () => {
+      const preferences = {
+        motivational: document.getElementById('motivational').checked,
+        healthReminders: document.getElementById('healthReminders').checked,
+        productivityTips: document.getElementById('productivityTips').checked,
+      };
+
+      chrome.storage.local.set({ preferences }, function() {
+        alert('Preferences saved!');
+      });
+    });
+  </script>
+</body>
+</html>
