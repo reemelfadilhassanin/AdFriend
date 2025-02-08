@@ -1,6 +1,74 @@
-// Background script for blocking ads using declarativeNetRequest
+// Define the ad-blocking rules
+const adBlockingRules = [
+  {
+    id: 1,
+    priority: 1,
+    action: { type: "block" },
+    condition: {
+      urlFilter: "*://*.google.com/ads/*",  // Block Google Ads
+      resourceTypes: ["image", "script", "xmlhttprequest"]
+    }
+  },
+  {
+    id: 2,
+    priority: 1,
+    action: { type: "block" },
+    condition: {
+      urlFilter: "*://*.doubleclick.net/*",  // Block DoubleClick Ads
+      resourceTypes: ["image", "script", "xmlhttprequest"]
+    }
+  }
+];
 
-// List of possible positive content widgets (same as in content.js)
+// Function to apply the blocking rules
+function applyBlockingRules() {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    addRules: adBlockingRules
+  }, () => {
+    if (chrome.runtime.lastError) {
+      console.error("Failed to add blocking rules:", chrome.runtime.lastError);
+    } else {
+      console.log("Blocking rules applied successfully.");
+    }
+  });
+}
+
+// Function to remove the blocking rules
+function removeBlockingRules() {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [1, 2]
+  }, () => {
+    if (chrome.runtime.lastError) {
+      console.error("Failed to remove blocking rules:", chrome.runtime.lastError);
+    } else {
+      console.log("Blocking rules removed successfully.");
+    }
+  });
+}
+
+// Listen for messages to enable/disable ad-blocking
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+  if (request.action === 'enable') {
+    console.log("Enabling ad-blocking...");
+    applyBlockingRules();
+    chrome.storage.local.set({ adBlockerEnabled: true });
+  } else if (request.action === 'disable') {
+    console.log("Disabling ad-blocking...");
+    removeBlockingRules();
+    chrome.storage.local.set({ adBlockerEnabled: false });
+  }
+});
+
+// Ensure the background script starts with the correct blocking rules based on the stored state
+chrome.storage.local.get(['adBlockerEnabled'], function(result) {
+  if (result.adBlockerEnabled === true) {
+    applyBlockingRules();
+  } else {
+    removeBlockingRules();
+  }
+});
+
+// List of positive content widgets (optional feature)
 const positiveContentWidgets = [
   "Stay positive! 🌟 You can do it!",
   "Take a break and stretch! 🧘‍♂️",
@@ -35,74 +103,15 @@ function updateIconWithPositiveMessage() {
   });
 
   chrome.action.setBadgeBackgroundColor({
-      color: "#4CAF50"  // Set the badge background color (green)
+      color: "#4A90E2"  // Set the badge background color (green)
   });
 
   console.log(`Icon updated with positive message: ${message}`);
 }
 
-// Define the ad-blocking rules
-const adBlockingRules = [
-{
-  id: 1,
-  priority: 1,
-  action: { type: "block" },
-  condition: {
-    urlFilter: "*://*.google.com/ads/*",  // Block Google Ads
-    resourceTypes: ["image", "script", "xmlhttprequest"]
-  }
-},
-{
-  id: 2,
-  priority: 1,
-  action: { type: "block" },
-  condition: {
-    urlFilter: "*://*.doubleclick.net/*",  // Block DoubleClick Ads
-    resourceTypes: ["image", "script", "xmlhttprequest"]
-  }
-}
-];
-
-// Function to apply the blocking rules
-chrome.declarativeNetRequest.updateDynamicRules({
-addRules: adBlockingRules
-}, () => {
-if (chrome.runtime.lastError) {
-  console.error("Failed to add blocking rules:", chrome.runtime.lastError);
-} else {
-  console.log("Blocking rules applied successfully.");
-}
-});
-
-// Listen for messages to enable/disable ad-blocking
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-if (request.action === 'enable') {
-  console.log("Enabling ad-blocking...");
-  chrome.declarativeNetRequest.updateDynamicRules({
-    addRules: adBlockingRules
-  }, () => {
-    if (chrome.runtime.lastError) {
-      console.error("Error enabling blocking rules:", chrome.runtime.lastError);
-    } else {
-      console.log("Ad-blocking enabled successfully.");
-    }
-  });
-} else if (request.action === 'disable') {
-  console.log("Disabling ad-blocking...");
-  chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [1, 2]
-  }, () => {
-    if (chrome.runtime.lastError) {
-      console.error("Error disabling blocking rules:", chrome.runtime.lastError);
-    } else {
-      console.log("Ad-blocking disabled successfully.");
-    }
-  });
-}
-});
-
 // Example: Update the icon when the extension starts or at regular intervals
 updateIconWithPositiveMessage();
 
 // You can also update the icon periodically or based on specific events
-setInterval(updateIconWithPositiveMessage, 6000);  // Update the icon every minute
+setInterval(updateIconWithPositiveMessage, 6000);  // Update the icon every 6 seconds
+

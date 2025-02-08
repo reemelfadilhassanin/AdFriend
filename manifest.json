@@ -4,9 +4,11 @@
   "description": "Block ads and replace with positive messages.",
   "version": "2.0",
   "permissions": [
+    "storage",
     "declarativeNetRequest",
     "activeTab"
   ],
+  
   "host_permissions": [
     "http://*/*",
     "https://*/*"
