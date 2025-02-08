@@ -15,18 +15,6 @@ function getRandomMessage() {
   return positiveContentWidgets[randomIndex];
 }
 
-// Function to inject Bootstrap Icons (only for the icon, not global Bootstrap CSS)
-function injectBootstrapIcons() {
-  try {
-    const linkIcons = document.createElement('link');
-    linkIcons.rel = 'stylesheet';
-    linkIcons.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css';
-    document.head.appendChild(linkIcons);
-  } catch (error) {
-    console.error("Error injecting Bootstrap Icons:", error);
-  }
-}
-
 // Function to inject Animate.css for animations
 function injectAnimateCSS() {
   try {
@@ -53,7 +41,7 @@ function getTopNavHeight() {
   return 80; // Default height if no header or nav found
 }
 
-// Function to create a Bootstrap-styled widget with an icon and message
+// Function to create a widget with an emoji icon and message
 function createWidget() {
   try {
     let widget = document.createElement('div');
@@ -62,9 +50,9 @@ function createWidget() {
 
     // Add custom styles directly to the widget to prevent global style interference
     widget.style.position = 'fixed'; // Fixed position to ensure it's on top but doesn't affect layout
-    widget.style.top = `${navHeight + 10}px`; // Position the widget below the navigation bar with some padding
+    widget.style.top = `${navHeight + 30}px`; // Increase distance from the navbar to avoid overlap
     widget.style.left = '20px';
-    widget.style.zIndex = '9998'; // Ensure the widget is below the navbar
+    widget.style.zIndex = '9997'; // Ensure the widget is below the navbar
     widget.style.padding = '20px 25px'; // Padding for readability
     widget.style.background = 'linear-gradient(135deg, #4A90E2, #81C784)'; // Gradient background
     widget.style.color = '#ffffff'; // White text for better contrast
@@ -76,9 +64,9 @@ function createWidget() {
     widget.style.transition = 'all 0.3s ease-in-out'; // Smooth transition for any hover effects
     widget.classList.add('animate__animated', 'animate__fadeInUp', 'animate__delay-1s'); // Animation classes
 
-    // Adding the icon and the random message
+    // Adding the emoji icon and the random message
     widget.innerHTML = `
-      <i class="fas fa-smile-beam"></i> <strong>${getRandomMessage()}</strong>
+      <span style="font-size: 30px;">😊</span> <strong>${getRandomMessage()}</strong>
       <button type="button" class="close" style="font-size: 28px; color: #ffffff; background: transparent; border: none;">&times;</button>
     `;
 
@@ -126,7 +114,7 @@ function replaceAds() {
     let existingWidget = document.querySelector('div[style*="position: fixed"]');
 
     if (existingWidget) {
-      // If a widget already exists, do not remove it unnecessarily
+      // If a widget already exists, do not remove it
       console.log("Widget already exists, skipping replacement.");
       return; // Skip replacement
     }
@@ -147,28 +135,40 @@ function replaceAds() {
           console.log('Ad replaced with widget.');
         }
       });
-
-      // Ensure the GitHub navbar is above the widget
-      const navbar = document.querySelector('header, nav');
-      if (navbar) {
-        navbar.style.zIndex = '10000';  // Set navbar to have the highest z-index
-        console.log("Navbar z-index set to 10000");
-      }
     } else {
       console.log("No ads found to replace.");
     }
+
+    // Ensure the navbar stays on top
+    const navbar = document.querySelector('header, nav');
+    if (navbar) {
+      navbar.style.zIndex = '10000';  // Set navbar to a higher z-index to stay on top of the widget
+      console.log("Navbar z-index set to 10000");
+    }
+
   } catch (error) {
     console.error('Error while replacing ads:', error);
   }
 }
 
-// Delay to ensure the page and ads are fully loaded
-window.addEventListener('load', () => {
-  replaceAds();
+// MutationObserver to detect ads added dynamically
+const observer = new MutationObserver(replaceAds);
+
+// Set up the observer to watch for DOM changes
+observer.observe(document.body, {
+  childList: true,
+  subtree: true
 });
 
-// Run replaceAds() every 6 seconds in case ads are dynamically loaded
+// Inject Animate.css for animations
+injectAnimateCSS();
+
+// Run replaceAds() on page load
+window.onload = () => {
+  replaceAds();
+};
+
+// Also run after a delay in case ads are dynamically loaded
 setInterval(replaceAds, 6000);
 
 console.log("Ad replacement script executed successfully!");
-
