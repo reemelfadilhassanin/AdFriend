@@ -103,7 +103,7 @@ function updateIconWithPositiveMessage() {
   });
 
   chrome.action.setBadgeBackgroundColor({
-      color: "#4A90E2"  // Set the badge background color (green)
+      color: "#4A90E2"  // Set the badge background color (blue)
   });
 
   console.log(`Icon updated with positive message: ${message}`);
@@ -112,6 +112,5 @@ function updateIconWithPositiveMessage() {
 // Example: Update the icon when the extension starts or at regular intervals
 updateIconWithPositiveMessage();
 
-// You can also update the icon periodically or based on specific events
+// Update the icon periodically (every 6 seconds)
 setInterval(updateIconWithPositiveMessage, 6000);  // Update the icon every 6 seconds
-
