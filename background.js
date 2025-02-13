@@ -90,20 +90,20 @@ function updateIconWithPositiveMessage() {
 
   // Set the extension's icon to reflect the positive message
   chrome.action.setIcon({
-      path: {
-          16: "icons/icon-16.png",  // Use your icon paths
-          48: "icons/icon-48.png",
-          128: "icons/icone-128.png"
-      }
+    path: {
+      16: "icons/icon-16.png",  // Use your icon paths
+      48: "icons/icon-48.png",
+      128: "icons/icone-128.png"
+    }
   });
 
   // Optionally, update the badge with part of the message (up to the first 4 characters)
   chrome.action.setBadgeText({
-      text: message.substring(0, 4) // Limit the message length for the badge text (first 4 chars)
+    text: message.substring(0, 4) // Limit the message length for the badge text (first 4 chars)
   });
 
   chrome.action.setBadgeBackgroundColor({
-      color: "#4A90E2"  // Set the badge background color (blue)
+    color: "#4A90E2"  // Set the badge background color (blue)
   });
 
   console.log(`Icon updated with positive message: ${message}`);

@@ -1,81 +1,64 @@
-// Function to replace an ad with a widget
-const replaceAdWithWidget = (ad) => {
-  console.log('Attempting to replace ad with widget...');
+// Array to track removed ads
+let removedAds = [];
 
-  // Check if the widget already exists to avoid redundant replacements
-  if (document.querySelector('.ad-widget')) {
-    console.log('Widget already exists, skipping replacement.');
-    return; // Skip replacement if widget exists
-  }
-
-  // Create and insert the widget
-  const widget = createWidget(); // Assuming `createWidget()` is a function that creates the widget
-  if (!widget) {
-    console.error("Widget creation failed.");
-    return; // Exit if widget creation failed
-  }
-
-  ad.replaceWith(widget); // Replace the ad with the widget
-  console.log('Ad replaced with widget.');
-};
-
-// Function to replace all ads on the page
-const replaceAds = () => {
-  const ads = document.querySelectorAll('.ad-element'); // Assuming ads are identified with '.ad-element'
-  console.log('Found ads:', ads); // Debug: check if ads are found
-
-  if (ads.length === 0) {
-    console.log('No ads found to replace.');
-  }
-  ads.forEach(ad => {
-    replaceAdWithWidget(ad); // Call the function to replace each ad with a widget
-  });
-};
-
-// Function to handle DOM changes and ensure ad replacements happen after React components are loaded
-const handlePageLoad = () => {
-  // Delay ad replacement to ensure the page is fully loaded
-  setTimeout(() => {
-    replaceAds(); // Call replaceAds after a short delay (adjustable)
-  }, 2000); // 2 seconds delay (adjust the delay if needed)
-};
-
-// Using MutationObserver to watch for changes in the DOM and replace ads when added
-const observer = new MutationObserver((mutationsList) => {
-  for (const mutation of mutationsList) {
-    if (mutation.type === 'childList') {
-      // Check if ads were added to the DOM and replace them
-      console.log('Mutation detected, checking for ads...');
-      replaceAds();
-    }
-  }
-});
-
-// Start observing the document body for any added or removed child nodes (subtree)
-observer.observe(document.body, { childList: true, subtree: true });
-
-// Run the page load handler once to ensure we replace ads immediately on initial load
-handlePageLoad();
-
-// Function to get a random positive message from a list
-function getRandomMessage() {
-  const positiveMessages = [
-    "Stay positive! 🌟 You can do it!",
-    "Take a break and stretch! 🧘‍♂️",
-    "Have you done your burpees today? 🤸‍♀️",
-    "Keep going! Every step brings you closer to your goal! 🚀",
-    "Remember: Progress is progress, no matter how small! ✨"
+// Function to replace ads with the widget and block ads
+function replaceAdsWithWidget() {
+  const adSelectors = [
+    'div[id*="ad"]', 'div[class*="ad"]', 'iframe[src*="ad"]', 'img[src*="ad"]', 'script[src*="ads"]', '.ad-container',
+    '.advertisement', '.ad-banner', 'div[data-ad*=""]', 'div[role="advertisement"]',
+    '[id^="ad-"]', '[class*="ad-"]', '[class*="advert"]', '[src*="ad"]'
   ];
-  const randomIndex = Math.floor(Math.random() * positiveMessages.length);
-  return positiveMessages[randomIndex];
+
+  // Find and remove all ads matching the selectors
+  const adElements = document.querySelectorAll(adSelectors.join(', '));
+  console.log('Ads found to replace:', adElements); // Log ads found
+
+  if (adElements.length === 0) {
+    console.log('No ads found to replace.');
+    createWidget(); // Create widget even if no ads are found
+    return;
+  }
+
+  // Remove all ad elements from the DOM and replace with widget
+  adElements.forEach((ad, index) => {
+    console.log(`Removing ad ${index + 1}:`, ad); // Log each ad removal
+    ad.remove(); // Remove the ad element completely from the DOM
+    removedAds.push(ad); // Keep track of removed ads
+    createWidget(); // Replace ad with widget
+  });
+
+  // Monitor dynamically added nodes and remove ads if they appear later
+  const observer = new MutationObserver((mutationsList) => {
+    mutationsList.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1 && node.matches(adSelectors.join(', '))) {
+          console.log('Blocking dynamically added ad:', node);
+          node.remove();  // Remove the ad from the DOM
+          removedAds.push(node); // Track removed ad
+          createWidget(); // Replace ad with widget
+        }
+      });
+    });
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    characterData: true
+  });
+
+  console.log('MutationObserver for dynamic ads started.');
 }
 
-// Function to inject Animate.css for animations
+// Function to inject Animate.css asynchronously
 function injectAnimateCSS() {
   try {
+    if (document.querySelector('.animate__animated')) return; // Avoid reloading if already injected
     const linkAnimateCSS = document.createElement('link');
     linkAnimateCSS.rel = 'stylesheet';
     linkAnimateCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css';
+    linkAnimateCSS.onload = () => console.log('Animate.css loaded');
     document.head.appendChild(linkAnimateCSS);
     console.log("Animate.css injected successfully.");
   } catch (error) {
@@ -83,32 +66,26 @@ function injectAnimateCSS() {
   }
 }
 
-// Function to get the height of the top navigation bar
-function getTopNavHeight() {
-  const header = document.querySelector('header');
-  const nav = document.querySelector('nav');
-  
-  if (header) {
-    return header.offsetHeight;
-  } else if (nav) {
-    return nav.offsetHeight;
+// Variable to track the widget
+let widgetCreated = false;
+
+// Function to create the widget
+function createWidget() {
+  // Check if a widget already exists
+  if (widgetCreated) {
+    console.log('Widget already exists. Not creating a new one.');
+    return; // Exit if a widget is already present
   }
 
-  return 80; // Default height if no header or nav found
-}
-
-// Function to create a widget with an emoji icon and message
-function createWidget() {
   try {
     let widget = document.createElement('div');
     const navHeight = getTopNavHeight();
     console.log("Navbar height:", navHeight);
 
-    // Add custom styles directly to the widget to prevent global style interference
     widget.style.position = 'fixed'; // Fixed position to ensure it's on top but doesn't affect layout
     widget.style.top = `${navHeight + 50}px`; // Increase distance from the navbar to avoid overlap
     widget.style.left = '20px';
-    widget.style.zIndex = '9999'; // Ensure the widget is above the ads, ensure it's visible
+    widget.style.zIndex = '9999'; // Ensure the widget is above any content
     widget.style.padding = '20px 25px'; // Padding for readability
     widget.style.background = 'linear-gradient(135deg, #4A90E2, #81C784)'; // Gradient background
     widget.style.color = '#ffffff'; // White text for better contrast
@@ -166,12 +143,14 @@ function createWidget() {
       // After the fade-out animation ends, remove the widget from the DOM
       widget.addEventListener('animationend', () => {
         widget.remove();  // Remove the widget after the fade-out animation completes
+        widgetCreated = false; // Reset widgetCreated to allow new widget creation
         console.log('Widget closed.');
       });
     });
 
-    // Directly append the widget to the body for testing
+    // Append the widget to the body
     document.body.appendChild(widget);
+    widgetCreated = true; // Mark the widget as created
     console.log('Widget appended to the body.');
 
     return widget;
@@ -180,12 +159,127 @@ function createWidget() {
   }
 }
 
+// Function to get random messages
+function getRandomMessage() {
+  const positiveMessages = [
+    "Stay positive! 🌟 You can do it!",
+    "Take a break and stretch! 🧘‍♂️",
+    "Have you done your burpees today? 🤸‍♀️",
+    "Keep going! Every step brings you closer to your goal! 🚀",
+    "Remember: Progress is progress, no matter how small! ✨"
+  ];
+  const randomIndex = Math.floor(Math.random() * positiveMessages.length);
+  return positiveMessages[randomIndex];
+}
+
+// Function to get the height of the top navigation bar
+function getTopNavHeight() {
+  const header = document.querySelector('header');
+  const nav = document.querySelector('nav');
+
+  if (header) {
+    return header.offsetHeight;
+  } else if (nav) {
+    return nav.offsetHeight;
+  }
+
+  return 80; // Default height if no header or nav found
+}
+
+// Function to observe mutations in the DOM (for dynamic content)
+function observeMutations() {
+  const observer = new MutationObserver((mutationsList) => {
+    mutationsList.forEach(mutation => {
+      if (mutation.type === 'childList' || mutation.type === 'subtree') {
+        console.log('Mutation detected, checking for ads...');
+        replaceAdsWithWidget(); // Re-check for ads after DOM changes
+      }
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+  console.log('Mutation observer started.');
+}
+
+// Function to handle CORS issues
+function handleCORS(url) {
+  try {
+    fetch(url, { mode: 'no-cors' })
+      .then(response => {
+        if (response.ok) {
+          console.log('CORS request successful.');
+        } else {
+          console.log('CORS request failed with status: ' + response.status);
+        }
+      })
+      .catch(error => console.error('CORS fetch error:', error));
+  } catch (error) {
+    console.error('Error in handling CORS:', error);
+  }
+}
+
+// Retry logic for failed resources (503 errors)
+function retryRequest(url, retries = 3, delay = 1000) {
+  return new Promise((resolve, reject) => {
+    function attemptRequest(attempt) {
+      fetch(url)
+        .then(response => {
+          if (response.ok) {
+            resolve(response);
+          } else {
+            if (attempt < retries) {
+              console.log(`Request failed, retrying... Attempt ${attempt + 1}`);
+              setTimeout(() => attemptRequest(attempt + 1), delay);
+            } else {
+              reject('Request failed after ' + retries + ' attempts');
+            }
+          }
+        })
+        .catch(reject);
+    }
+    attemptRequest(0);
+  });
+}
+
+// Function to handle 403 errors (Forbidden)
+function handle403Error(url) {
+  console.error(`403 Forbidden error when trying to access ${url}. You may need to check access permissions.`);
+}
+
+// Initialize logic based on ad blocking state
+function init() {
+  chrome.storage.sync.get(['adBlockingEnabled'], function(result) {
+    const isAdBlockingEnabled = result.adBlockingEnabled;
+
+    console.log('Ad blocking enabled:', isAdBlockingEnabled); // Log the ad-blocking setting
+    if (isAdBlockingEnabled) {
+      replaceAdsWithWidget(); // Block ads and replace them with widgets
+    } else {
+      console.log('Ad blocking is disabled.');
+      removeWidget(); // Remove widget if ads are not blocked
+    }
+  });
+  handleCORS('https://prebid.smilewanted.com/');
+  retryRequest('https://cs.lkqd.net/cs?partnerId=59&partnerUserId=CAESEBQYnugWU6tP6glVlLlebAI&google_cver=1')
+    .then(response => console.log('Request succeeded:', response))
+    .catch(error => console.log('Request failed:', error));
+
+  handle403Error('https://prebid.smilewanted.com/');
+}
+
+// Remove widget if ad blocking is disabled
+function removeWidget() {
+  const widget = document.querySelector('.ad-widget');
+  if (widget) {
+    widget.remove();
+    console.log('Widget removed as ad-blocking is disabled.');
+  }
+}
+
+// Initialize everything
+init();
+
 // Ensure Animate.css is loaded for animations
 injectAnimateCSS();
-
-// Directly test by creating and appending the widget
-window.onload = () => {
-  createWidget();
-};
 
 console.log("Ad replacement script executed successfully!");

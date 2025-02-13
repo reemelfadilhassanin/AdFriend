@@ -2,126 +2,18 @@
 <html>
   <head>
     <title>AdFriend</title>
-    <!-- Link to Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEJtA8i7yD6B11gW1rxwXoJbu6H6E6t2bZ5sqC85lFe6s0Ch7hZzAftNejfx5" crossorigin="anonymous">
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        width: 250px;
-        text-align: center;
-        background-color: #f9f9f9;
-      }
-
-      h3 {
-        font-size: 22px;
-        color: #333;
-        margin-bottom: 20px;
-      }
-
-      button {
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        padding: 10px 15px;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 5px;
-        margin: 5px 0;
-        width: 100%;
-        transition: background-color 0.3s ease;
-      }
-
-      button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-      }
-
-      button:hover:not(:disabled) {
-        background-color: #45a049;
-      }
-
-      #status-text {
-        font-size: 16px;
-        font-weight: bold;
-        color: #333;
-        margin-top: 10px;
-      }
-
-      footer {
-        font-size: 12px;
-        color: #777;
-        margin-top: 20px;
-      }
-    </style>
   </head>
   <body>
     <h3>AdFriend</h3>
-    
-    <!-- Bootstrap Buttons with Custom Classes -->
     <button id="enable" class="btn btn-success w-100 mb-3">Enable Ad-Blocking</button>
     <button id="disable" class="btn btn-danger w-100 mb-3" disabled>Disable Ad-Blocking</button>
-
-    <!-- Status Text -->
     <p id="status-text" class="status-text">Ad Blocking is Disabled</p>
-
-    <!-- Footer Text -->
     <footer>
       <p>Powered by AdFriend Extension</p>
     </footer>
 
-    <!-- Script -->
-    <script>
-      // Wait until the DOM is fully loaded before executing
-      document.addEventListener('DOMContentLoaded', function () {
-        const enableButton = document.getElementById('enable');
-        const disableButton = document.getElementById('disable');
-        const statusText = document.getElementById('status-text');
-
-        // Fetch the current state of ad-blocker from storage
-        chrome.storage.local.get(['adBlockerEnabled'], function(result) {
-          if (result.adBlockerEnabled === true) {
-            // Ad-blocking is enabled
-            enableButton.disabled = true;
-            disableButton.disabled = false;
-            statusText.textContent = 'Ad Blocking is Enabled';
-          } else {
-            // Ad-blocking is disabled
-            enableButton.disabled = false;
-            disableButton.disabled = true;
-            statusText.textContent = 'Ad Blocking is Disabled';
-          }
-        });
-
-        // Enable ad-blocking when the 'Enable' button is clicked
-        enableButton.addEventListener('click', function () {
-          chrome.storage.local.set({ adBlockerEnabled: true }, function() {
-            // Send message to the background to enable blocking
-            chrome.runtime.sendMessage({ action: 'enable' });
-
-            // Update UI after enabling
-            enableButton.disabled = true;
-            disableButton.disabled = false;
-            statusText.textContent = 'Ad Blocking is Enabled';
-          });
-        });
-
-        // Disable ad-blocking when the 'Disable' button is clicked
-        disableButton.addEventListener('click', function () {
-          chrome.storage.local.set({ adBlockerEnabled: false }, function() {
-            // Send message to the background to disable blocking
-            chrome.runtime.sendMessage({ action: 'disable' });
-
-            // Update UI after disabling
-            enableButton.disabled = false;
-            disableButton.disabled = true;
-            statusText.textContent = 'Ad Blocking is Disabled';
-          });
-        });
-      });
-    </script>
-
-    <!-- Link to Bootstrap JS (optional, only needed for Bootstrap's JS components) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQfqwnNn+6vh6sbQzF2DVEUft4Jz6etRU1MjJ6TFLzFj7dkVczqY5vwmwEOH5E93" crossorigin="anonymous"></script>
+    <!-- External script reference -->
+    <script src="popup.js"></script>
   </body>
 </html>

@@ -7,9 +7,8 @@
     "storage",
     "declarativeNetRequest",
     "activeTab",
-  "background"
+    "background"
   ],
-  
   "host_permissions": [
     "http://*/*",
     "https://*/*"
