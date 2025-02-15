@@ -93,7 +93,7 @@ function updateIconWithPositiveMessage() {
     path: {
       16: "icons/icon-16.png",  // Use your icon paths
       48: "icons/icon-48.png",
-      128: "icons/icone-128.png"
+      128: "icons/icon-128.png"
     }
   });
 

@@ -12,6 +12,20 @@ const widgetMessages = [
     color: '#4E7838'
   },
   {
+    emoji: "🎯",
+    message: "Poll: What's your favorite productivity tool? 🧠",
+    background: '#FF5722',
+    color: '#FFF',
+    pollOptions: ['Trello', 'Asana', 'Todoist', 'Other'],
+    pollResponse: null
+  },
+  {
+    emoji: "🍎",
+    message: "Tip: Drink a glass of water every hour! 💧",
+    background: '#8BC34A',
+    color: '#FFF'
+  },
+  {
     emoji: "💡",
     message: "Keep shining bright! ✨",
     background: '#3F8CFF',
@@ -237,22 +251,76 @@ function observeMutations() {
   console.log('Mutation observer started.');
 }
 
+// Function to handle CORS issues
+function handleCORS(url) {
+  try {
+    fetch(url, { mode: 'no-cors' })
+      .then(response => {
+        if (response.ok) {
+          console.log('CORS request successful.');
+        } else {
+          console.log('CORS request failed with status: ' + response.status);
+        }
+      })
+      .catch(error => console.error('CORS fetch error:', error));
+  } catch (error) {
+    console.error('Error in handling CORS:', error);
+  }
+}
+
+// Retry logic for failed resources (503 errors)
+function retryRequest(url, retries = 3, delay = 1000) {
+  return new Promise((resolve, reject) => {
+    function attemptRequest(attempt) {
+      fetch(url)
+        .then(response => {
+          if (response.ok) {
+            resolve(response);
+          } else {
+            if (attempt < retries) {
+              console.log(`Request failed, retrying... Attempt ${attempt + 1}`);
+              setTimeout(() => attemptRequest(attempt + 1), delay);
+            } else {
+              reject('Request failed after ' + retries + ' attempts');
+            }
+          }
+        })
+        .catch(reject);
+    }
+    attemptRequest(0);
+  });
+}
+
+// Function to handle 403 errors (Forbidden)
+
+
 // Initialize logic based on ad blocking state
 function init() {
+  // Check if ad-blocking is enabled
   chrome.storage.sync.get(['adBlockingEnabled'], function(result) {
     const isAdBlockingEnabled = result.adBlockingEnabled;
 
     console.log('Ad blocking enabled:', isAdBlockingEnabled); // Log the ad-blocking setting
     if (isAdBlockingEnabled) {
-      replaceAdsWithWidget(); // Block ads and replace them with widgets
+      // Enable ad-blocking logic: Replace ads with the widget
+      replaceAdsWithWidget();
     } else {
-      console.log('AdFriend is disabled.');
-      removeWidget(); // Remove widget if ads are not blocked
+      console.log('Ad blocking is disabled.');
     }
   });
+
   handleCORS('https://prebid.smilewanted.com/');
-  retryRequest('https://cs.lkqd.net/cs?partnerId=59&partnerUserId=...');
+  retryRequest('https://cs.lkqd.net/cs?partnerId=59&partnerUserId=CAESEBQYnugWU6tP6glVlLlebAI&google_cver=1')
+    .then(response => console.log('Request succeeded:', response))
+    .catch(error => console.log('Request failed:', error));
+
+
 }
 
-init(); // Start the process
-observeMutations(); // Start observing mutations
+// Initialize everything
+init();
+
+// Ensure Animate.css is loaded for animations
+injectAnimateCSS();
+
+console.log("Ad replacement script executed successfully!");
