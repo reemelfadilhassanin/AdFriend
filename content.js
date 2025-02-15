@@ -1,5 +1,147 @@
-// Array to track removed ads
-let removedAds = [];
+let removedAds = []; // Array to track removed ads
+
+let widgetCreated = false; // Ensure only one widget is shown at a time
+let widgetQueue = []; // Queue to hold widgets to be shown one at a time
+
+// Array of different widget contents/messages
+const widgetMessages = [
+  {
+    emoji: "🦉",
+    message: "Stay wise and keep learning! 📚",
+    background: '#F8A01A',
+    color: '#4E7838'
+  },
+  {
+    emoji: "💡",
+    message: "Keep shining bright! ✨",
+    background: '#3F8CFF',
+    color: '#FFF'
+  },
+  {
+    emoji: "🔥",
+    message: "Stay motivated, keep going! 💪",
+    background: '#FF6F61',
+    color: '#FFF'
+  },
+  {
+    emoji: "🌟",
+    message: "Stay positive! 🌟 You can do it!",
+    background: '#FFEB3B',
+    color: '#000'
+  },
+  {
+    emoji: "🧘‍♂️",
+    message: "Take a break and stretch! 🧘‍♂️",
+    background: '#8BC34A',
+    color: '#FFF'
+  },
+  {
+    emoji: "🤸‍♀️",
+    message: "Have you done your burpees today? 🤸‍♀️",
+    background: '#FFC107',
+    color: '#000'
+  },
+  {
+    emoji: "🚀",
+    message: "Keep going! Every step brings you closer to your goal! 🚀",
+    background: '#2196F3',
+    color: '#FFF'
+  },
+  {
+    emoji: "✨",
+    message: "Remember: Progress is progress, no matter how small! ✨",
+    background: '#673AB7',
+    color: '#FFF'
+  }
+];
+
+// Function to create a widget and add to the queue
+function createWidget() {
+  // Ensure that no other widget is currently shown
+  if (widgetCreated) {
+    console.log('Widget already exists.');
+    return; // Exit if a widget is already present
+  }
+
+  try {
+    // Pick a random widget message
+    const randomWidget = widgetMessages[Math.floor(Math.random() * widgetMessages.length)];
+    let widget = document.createElement('div');
+    const navHeight = getTopNavHeight();
+    console.log("Navbar height:", navHeight);
+
+    // Set widget styles
+    widget.style.position = 'fixed';
+    widget.style.top = '50%'; // Center from top
+    widget.style.left = '50%'; // Center from left
+    widget.style.transform = 'translate(-50%, -50%)'; // Center it
+    widget.style.zIndex = '9999';
+    widget.style.padding = '20px';
+    widget.style.background = randomWidget.background; // Use the background color from the message
+    widget.style.color = randomWidget.color; // Use the color from the message
+    widget.style.fontSize = '18px';
+    widget.style.fontWeight = 'bold';
+    widget.style.textAlign = 'center';
+    widget.style.borderRadius = '15px';
+    widget.style.boxShadow = '0px 4px 15px rgba(0, 0, 0, 0.2)';
+    widget.style.transition = 'all 0.3s ease-in-out';
+    widget.classList.add('animate__animated', 'animate__fadeInUp', 'animate__delay-1s'); // Add animation
+
+    // Add emoji and message
+    widget.innerHTML = ` 
+      <span style="font-size: 30px;">${randomWidget.emoji}</span> <strong>${randomWidget.message}</strong>
+      <button type="button" class="close" style="font-size: 28px; color: #ffffff; background: transparent; border: none;">&times;</button>
+    `;
+
+    // Add hover effect
+    widget.addEventListener('mouseenter', () => {
+      widget.style.transform = 'scale(1.05)';
+    });
+    widget.addEventListener('mouseleave', () => {
+      widget.style.transform = 'scale(1)';
+    });
+
+    // Close button functionality (without animations)
+    const closeButton = widget.querySelector('.close');
+    closeButton.addEventListener('click', () => {
+      console.log('Close button clicked');
+      // Simply remove the widget from the DOM without any animations
+      widget.remove();
+      widgetCreated = false; // Reset widgetCreated flag to false after removal
+      console.log('Widget removed from DOM');
+      
+      // Clear the queue
+      widgetQueue = [];
+      
+      // Attempt to show the next widget in the queue
+      showNextWidget();
+    });
+
+    // Append the widget to the body
+    document.body.appendChild(widget);
+    widgetCreated = true; // Mark widget as created
+    console.log('Widget appended to the body.');
+
+    // Add widget to the queue
+    widgetQueue.push(widget); // Add to the queue
+
+    // Show the next widget in the queue if there is one
+    showNextWidget();
+
+    return widget;
+  } catch (error) {
+    console.error("Error creating widget:", error);
+  }
+}
+
+// Function to display the next widget in the queue
+function showNextWidget() {
+  if (widgetQueue.length > 0) {
+    let nextWidget = widgetQueue.shift(); // Get the next widget in the queue
+    document.body.appendChild(nextWidget); // Display it
+    console.log('Next widget displayed.');
+  }
+}
 
 // Function to replace ads with the widget and block ads
 function replaceAdsWithWidget() {
@@ -65,6 +207,8 @@ function injectAnimateCSS() {
     console.error("Error injecting Animate.css:", error);
   }
 }
+
+// Function to get the height of the top navigation bar
 function getTopNavHeight() {
   const header = document.querySelector('header');
   const nav = document.querySelector('nav');
@@ -77,115 +221,6 @@ function getTopNavHeight() {
 
   return 80; // Default height if no header or nav found
 }
-
-// Variable to track the widget
-let widgetCreated = false;
-
-// Function to create the widget
-function createWidget() {
-  // Check if a widget already exists
-  if (widgetCreated) {
-    console.log('Widget already exists. Not creating a new one.');
-    return; // Exit if a widget is already present
-  }
-
-  try {
-    let widget = document.createElement('div');
-    const navHeight = getTopNavHeight();
-    console.log("Navbar height:", navHeight);
-
-    widget.style.position = 'fixed'; // Fixed position to ensure it's on top but doesn't affect layout
-    widget.style.top = `${navHeight + 50}px`; // Increase distance from the navbar to avoid overlap
-    widget.style.left = '20px';
-    widget.style.zIndex = '9999'; // Ensure the widget is above any content
-    widget.style.padding = '20px 25px'; // Padding for readability
-    widget.style.background = 'linear-gradient(135deg, #4A90E2, #81C784)'; // Gradient background
-    widget.style.color = '#ffffff'; // White text for better contrast
-    widget.style.fontSize = '18px'; // Slightly smaller font size for better fit
-    widget.style.fontWeight = 'bold'; // Bold text
-    widget.style.textAlign = 'center'; // Center the text
-    widget.style.borderRadius = '15px'; // Rounded corners
-    widget.style.boxShadow = '0px 4px 15px rgba(0, 0, 0, 0.2)'; // Deeper shadow for better depth
-    widget.style.transition = 'all 0.3s ease-in-out'; // Smooth transition for any hover effects
-    widget.classList.add('animate__animated', 'animate__fadeInUp', 'animate__delay-1s'); // Animation classes
-
-    // Adding the emoji icon and the random message
-    widget.innerHTML = ` 
-      <span style="font-size: 30px;">😊</span> <strong>${getRandomMessage()}</strong>
-      <button type="button" class="close" style="font-size: 28px; color: #ffffff; background: transparent; border: none;">&times;</button>
-    `;
-
-    // Force visibility by giving the widget dimensions and background color
-    widget.style.width = '300px';
-    widget.style.height = '150px';
-    widget.style.maxHeight = '150px'; // Prevents the widget from growing too tall
-    widget.style.overflow = 'hidden'; // Hides overflow content if any
-
-    // Log the widget styles and position to ensure it's being created
-    console.log('Widget created:', widget);
-    console.log('Widget styles:', widget.style);
-
-    // Add hover effect for widget appearance
-    widget.addEventListener('mouseenter', () => {
-      widget.style.transform = 'scale(1.05)'; // Slightly scale up on hover
-    });
-    widget.addEventListener('mouseleave', () => {
-      widget.style.transform = 'scale(1)'; // Reset scale on mouse leave
-    });
-
-    // Function to trigger the surprise animation
-    function triggerSurpriseAnimation() {
-      widget.classList.add('animate__animated', 'animate__shakeX');
-      
-      // Remove the animation class after it ends to allow it to trigger again if clicked
-      widget.addEventListener('animationend', () => {
-        widget.classList.remove('animate__shakeX');
-      });
-    }
-
-    // Trigger surprise animation when the widget is clicked
-    widget.addEventListener('click', triggerSurpriseAnimation);
-
-    // Add click event listener to close the widget when the close button is clicked
-    const closeButton = widget.querySelector('.close');
-    closeButton.addEventListener('click', () => {
-      triggerSurpriseAnimation(); // Trigger the surprise animation on close button click
-      // Add fade-out animation before removing the widget
-      widget.classList.add('animate__fadeOut'); // Fade-out animation class from Animate.css
-      // After the fade-out animation ends, remove the widget from the DOM
-      widget.addEventListener('animationend', () => {
-        widget.remove();  // Remove the widget after the fade-out animation completes
-        widgetCreated = false; // Reset widgetCreated to allow new widget creation
-        console.log('Widget closed.');
-      });
-    });
-
-    // Append the widget to the body
-    document.body.appendChild(widget);
-    widgetCreated = true; // Mark the widget as created
-    console.log('Widget appended to the body.');
-
-    return widget;
-  } catch (error) {
-    console.error("Error creating widget:", error);
-  }
-}
-
-// Function to get random messages
-function getRandomMessage() {
-  const positiveMessages = [
-    "Stay positive! 🌟 You can do it!",
-    "Take a break and stretch! 🧘‍♂️",
-    "Have you done your burpees today? 🤸‍♀️",
-    "Keep going! Every step brings you closer to your goal! 🚀",
-    "Remember: Progress is progress, no matter how small! ✨"
-  ];
-  const randomIndex = Math.floor(Math.random() * positiveMessages.length);
-  return positiveMessages[randomIndex];
-}
-
-// Function to get the height of the top navigation bar
-
 
 // Function to observe mutations in the DOM (for dynamic content)
 function observeMutations() {
@@ -202,51 +237,6 @@ function observeMutations() {
   console.log('Mutation observer started.');
 }
 
-// Function to handle CORS issues
-function handleCORS(url) {
-  try {
-    fetch(url, { mode: 'no-cors' })
-      .then(response => {
-        if (response.ok) {
-          console.log('CORS request successful.');
-        } else {
-          console.log('CORS request failed with status: ' + response.status);
-        }
-      })
-      .catch(error => console.error('CORS fetch error:', error));
-  } catch (error) {
-    console.error('Error in handling CORS:', error);
-  }
-}
-
-// Retry logic for failed resources (503 errors)
-function retryRequest(url, retries = 3, delay = 1000) {
-  return new Promise((resolve, reject) => {
-    function attemptRequest(attempt) {
-      fetch(url)
-        .then(response => {
-          if (response.ok) {
-            resolve(response);
-          } else {
-            if (attempt < retries) {
-              console.log(`Request failed, retrying... Attempt ${attempt + 1}`);
-              setTimeout(() => attemptRequest(attempt + 1), delay);
-            } else {
-              reject('Request failed after ' + retries + ' attempts');
-            }
-          }
-        })
-        .catch(reject);
-    }
-    attemptRequest(0);
-  });
-}
-
-// Function to handle 403 errors (Forbidden)
-function handle403Error(url) {
-  console.error(`403 Forbidden error when trying to access ${url}. You may need to check access permissions.`);
-}
-
 // Initialize logic based on ad blocking state
 function init() {
   chrome.storage.sync.get(['adBlockingEnabled'], function(result) {
@@ -261,26 +251,8 @@ function init() {
     }
   });
   handleCORS('https://prebid.smilewanted.com/');
-  retryRequest('https://cs.lkqd.net/cs?partnerId=59&partnerUserId=CAESEBQYnugWU6tP6glVlLlebAI&google_cver=1')
-    .then(response => console.log('Request succeeded:', response))
-    .catch(error => console.log('Request failed:', error));
-
-  handle403Error('https://prebid.smilewanted.com/');
+  retryRequest('https://cs.lkqd.net/cs?partnerId=59&partnerUserId=...');
 }
 
-// Remove widget if ad blocking is disabled
-function removeWidget() {
-  const widget = document.querySelector('.ad-widget');
-  if (widget) {
-    widget.remove();
-    console.log('Widget removed as AdFriend is disabled.');
-  }
-}
-
-// Initialize everything
-init();
-
-// Ensure Animate.css is loaded for animations
-injectAnimateCSS();
-
-console.log("Ad replacement script executed successfully!");
+init(); // Start the process
+observeMutations(); // Start observing mutations
