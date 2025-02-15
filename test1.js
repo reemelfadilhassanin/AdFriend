@@ -1,98 +1,55 @@
-function blockAds() {
-    const adSelectors = [
-      // Iframe-based ads
-      'iframe[src*="ad"]:not([src*="video"]), iframe[src*="ads"], iframe[src*="advert"]',
-      
-      // Divs with IDs or classes indicating ads, excluding footers and known non-ad elements
-      'div[id*="ad"]:not([id*="footer-ad"]):not([id*="header-ad"])', // Avoid footer and header ads
-      'div[class*="ad"]:not([class*="no-ad"]):not([class*="non-ad"])', // Avoid non-ad divs
-      
-      // Image-based ads
-      'img[src*="ad"]:not([src*="icon"]):not([src*="logo"])', // Exclude small icons and logos
-      
-      // Script-based ads (excluding analytics)
-      'script[src*="ads"]:not([src*="analytics"])',
-      
-      // Specific ad locations (e.g., skyscraper, banner)
-      'div.ad.dfp-skyscraper', 'div.ad.dfp-half-page-left', 'div.ad.dfp-top-right', 
-      'div.ad.dfp-bottom-right', 'div.ad.dfp-half-page-right', 'div.ad.lower-horizontal',
-      
-      // General ad-related elements
-      'div[id*="ad"]', 'div[class*="ad"]', 'iframe[src*="ad"]', 
-      'img[src*="ad"]', 'script[src*="ads"]', '.ad-container', 
-      '.advertisement', '.ad-banner', 'div[data-ad*=""]', 'div[role="advertisement"]',
-      
-      // Additional specific ad selectors
-      '[id^="ad-"]', '[class*="ad-"]', '[class*="advert"]', '[src*="ad"]',
-      'object', '.ads', 'span.ads', 'div.ads', 'iframe', 'object',
-      
-      // Cover all potential ad-related tags
-      'div', 'span', 'section', 'article', 'main', 'footer'
-    ];
-  
-    // Select all ad elements
-    const adElements = document.querySelectorAll(adSelectors.join(', '));
-  
-    console.log('Aggressive ad elements found:', adElements); // Log all ads found
-  
-    // Remove each ad and store it in the removedAds array
-    adElements.forEach((ad, index) => {
-      console.log(`Blocking ad ${index + 1}:`, ad);
-      console.log('Ad attributes:', ad.attributes);
-      console.log('Ad innerHTML:', ad.innerHTML);
-  
-      // Remove the ad from the DOM
-      ad.remove();
-      removedAds.push(ad); // Track removed ads
-    });
-  
-    // Monitor dynamically added ads
-    const observer = new MutationObserver((mutationsList) => {
-      mutationsList.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (node.nodeType === 1 && node.matches(adSelectors.join(', '))) {
-            console.log('Blocking dynamically added ad:', node);
-            node.remove(); // Remove dynamically added ad
-          }
-        });
+let removedAds = [];
+
+// Function to replace ads with the widget and block ads
+function replaceAdsWithWidget() {
+  const adSelectors = [
+    'div[id*="ad"]', 'div[class*="ad"]', 'iframe[src*="ad"]', 'img[src*="ad"]', 'script[src*="ads"]', '.ad-container',
+    '.advertisement', '.ad-banner', 'div[data-ad*=""]', 'div[role="advertisement"]',
+    '[id^="ad-"]', '[class*="ad-"]', '[class*="advert"]', '[src*="ad"]'
+  ];
+
+  // Find and remove all ads matching the selectors
+  const adElements = document.querySelectorAll(adSelectors.join(', '));
+  console.log('Ads found to replace:', adElements); // Log ads found
+
+  if (adElements.length === 0) {
+    console.log('No ads found to replace.');
+    createWidget(); // Create widget even if no ads are found
+    return;
+  }
+
+  // Remove all ad elements from the DOM and replace with widget
+  adElements.forEach((ad, index) => {
+    console.log(`Removing ad ${index + 1}:`, ad); // Log each ad removal
+    ad.remove(); // Remove the ad element completely from the DOM
+    removedAds.push(ad); // Keep track of removed ads
+    createWidget(); // Replace ad with widget
+  });
+
+  // Monitor dynamically added nodes and remove ads if they appear later
+  const observer = new MutationObserver((mutationsList) => {
+    mutationsList.forEach((mutation) => {
+      mutation.addedNodes.forEach((node) => {
+        if (node.nodeType === 1 && node.matches(adSelectors.join(', '))) {
+          console.log('Blocking dynamically added ad:', node);
+          node.remove();  // Remove the ad from the DOM
+          removedAds.push(node); // Track removed ad
+          createWidget(); // Replace ad with widget
+        }
       });
     });
-  
-    // Observe the body for changes to detect dynamically loaded ads
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      characterData: true
-    });
-  
-    console.log('MutationObserver for dynamic ads started.');
-  }
-  
-  
-  // Function to replace ads with the widget permanently
-  function replaceAdsWithWidget() {
-    const ads = document.querySelectorAll('.ad, .ads, .ad-banner, .advertisement, iframe[src*="ad"], img[src*="ad"], script[src*="ads"], .ad-container');
-    console.log('Ads found to replace:', ads); // Log ads found
-  
-    if (ads.length === 0) {
-      console.log('No ads found to replace.');
-      createWidget(); // Create widget even if no ads are found
-      return;
-    }
-  
-    // Remove all ad elements from the DOM
-    ads.forEach(ad => {
-      console.log('Removing ad:', ad); // Log each ad removal
-      ad.remove(); // Remove the ad element completely from the DOM
-    });
-  
-    // Ensure widget creation is delayed after ads are fully removed
-    setTimeout(() => {
-      createWidget(); // Create widget after ads are removed
-    }, 500); // Delay by 500ms
-  }
-  
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    characterData: true
+  });
+
+  console.log('MutationObserver for dynamic ads started.');
+}
+
   
   // Function to inject Animate.css asynchronously
   function injectAnimateCSS() {

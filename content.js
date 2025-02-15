@@ -65,6 +65,18 @@ function injectAnimateCSS() {
     console.error("Error injecting Animate.css:", error);
   }
 }
+function getTopNavHeight() {
+  const header = document.querySelector('header');
+  const nav = document.querySelector('nav');
+
+  if (header) {
+    return header.offsetHeight;
+  } else if (nav) {
+    return nav.offsetHeight;
+  }
+
+  return 80; // Default height if no header or nav found
+}
 
 // Variable to track the widget
 let widgetCreated = false;
@@ -173,18 +185,7 @@ function getRandomMessage() {
 }
 
 // Function to get the height of the top navigation bar
-function getTopNavHeight() {
-  const header = document.querySelector('header');
-  const nav = document.querySelector('nav');
 
-  if (header) {
-    return header.offsetHeight;
-  } else if (nav) {
-    return nav.offsetHeight;
-  }
-
-  return 80; // Default height if no header or nav found
-}
 
 // Function to observe mutations in the DOM (for dynamic content)
 function observeMutations() {
