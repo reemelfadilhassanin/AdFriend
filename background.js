@@ -53,7 +53,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     applyBlockingRules();
     chrome.storage.local.set({ adBlockerEnabled: true });
   } else if (request.action === 'disable') {
-    console.log("Disabling ad-blocking...");
+    console.log("Disabling AdFriend...");
     removeBlockingRules();
     chrome.storage.local.set({ adBlockerEnabled: false });
   }
@@ -98,13 +98,13 @@ function updateIconWithPositiveMessage() {
   });
 
   // Optionally, update the badge with part of the message (up to the first 4 characters)
-  chrome.action.setBadgeText({
-    text: message.substring(0, 4) // Limit the message length for the badge text (first 4 chars)
-  });
+  //chrome.action.setBadgeText({
+    //text: message.substring(0, 4) // Limit the message length for the badge text (first 4 chars)
+ // });
 
-  chrome.action.setBadgeBackgroundColor({
-    color: "#4A90E2"  // Set the badge background color (blue)
-  });
+ // chrome.action.setBadgeBackgroundColor({
+    //color: "#4A90E2"  // Set the badge background color (blue)
+  //});
 
   console.log(`Icon updated with positive message: ${message}`);
 }

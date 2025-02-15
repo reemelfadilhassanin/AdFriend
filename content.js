@@ -256,7 +256,7 @@ function init() {
     if (isAdBlockingEnabled) {
       replaceAdsWithWidget(); // Block ads and replace them with widgets
     } else {
-      console.log('Ad blocking is disabled.');
+      console.log('AdFriend is disabled.');
       removeWidget(); // Remove widget if ads are not blocked
     }
   });
@@ -273,7 +273,7 @@ function removeWidget() {
   const widget = document.querySelector('.ad-widget');
   if (widget) {
     widget.remove();
-    console.log('Widget removed as ad-blocking is disabled.');
+    console.log('Widget removed as AdFriend is disabled.');
   }
 }
 

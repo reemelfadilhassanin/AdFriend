@@ -26,11 +26,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // Helper function to update UI based on ad-blocking state
   function updateUI(isAdBlockingEnabled) {
     if (isAdBlockingEnabled) {
-      statusText.textContent = 'Ad Blocking is Enabled';
+      statusText.textContent = 'AdFriend is Enabled';
+      statusText.style.color = '#F8A01A'; // Set to enable button color (orange)
       enableButton.disabled = true;
       disableButton.disabled = false;
     } else {
-      statusText.textContent = 'Ad Blocking is Disabled';
+      statusText.textContent = 'AdFriend is Disabled';
+      statusText.style.color = '#4E7838'; // Set to disable button color (gray/green)
       enableButton.disabled = false;
       disableButton.disabled = true;
     }
