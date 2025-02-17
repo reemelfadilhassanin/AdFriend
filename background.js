@@ -113,4 +113,4 @@ function updateIconWithPositiveMessage() {
 updateIconWithPositiveMessage();
 
 // Update the icon periodically (every 6 seconds)
-setInterval(updateIconWithPositiveMessage, 6000);  // Update the icon every 6 seconds
+setInterval(updateIconWithPositiveMessage, 1000);  // Update the icon every 6 seconds
