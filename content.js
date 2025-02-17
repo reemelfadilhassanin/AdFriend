@@ -112,7 +112,6 @@ function getFunFact() {
   const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
   return randomFact;
 }
-// Function to create and remove widget after 6 seconds
 async function createWidget() {
   if (widgetCreated) {
     console.log('Widget already exists.');
@@ -127,7 +126,7 @@ async function createWidget() {
     let weatherData = null;
     if (randomWidget.message.includes("{city}")) {
       const city = "New York"; // Replace with the desired city
-      weatherData = await fetchWeather(city);
+      weatherData = await fetchWeather(city); // Fetch the weather data
     }
 
     let widget = document.createElement('div');
@@ -174,10 +173,12 @@ async function createWidget() {
 
     // Add hover effect
     widget.addEventListener('mouseenter', () => {
-      widget.style.transform = 'scale(1.05)';
+      widget.style.transform = 'scale(1.05)'; // Enlarge on hover
+      widget.style.transition = 'transform 0.3s ease'; // Smooth transition
     });
     widget.addEventListener('mouseleave', () => {
-      widget.style.transform = 'scale(1)';
+      widget.style.transform = 'scale(1)'; // Return to normal size
+      widget.style.transition = 'transform 0.3s ease'; // Smooth transition
     });
 
     // Close button functionality (without animations)
@@ -185,7 +186,6 @@ async function createWidget() {
     closeButton.addEventListener('click', () => {
       console.log('Close button clicked');
       widget.remove(); // Remove the widget when the close button is clicked
-     
       console.log('Widget removed from DOM');
       
       // Clear the queue
