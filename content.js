@@ -5,6 +5,11 @@ let widgetQueue = []; // Queue to hold widgets to be shown one at a time
 
 // Array of different widget contents/messages
 const widgetMessages = [
+  
+  {emoji: "☀️",  // You can use any relevant emoji for weather
+    message: "The current weather in {city} is: {weather}, {temp}°C.",
+    background: '#00BCD4',
+    color: '#FFF',},
   {
     emoji: "⏳",
     message: "Countdown Timer: 5 days left until the weekend!",
@@ -13,11 +18,7 @@ const widgetMessages = [
     type: 'countdown',
     countdownEndTime: '2025-02-20T00:00:00' // Define the end time for countdown
   }
-  , 
-  {emoji: "☀️",  // You can use any relevant emoji for weather
-    message: "The current weather in {city} is: {weather}, {temp}°C.",
-    background: '#00BCD4',
-    color: '#FFF',},
+ ,
   {
     emoji: "🤓",
     message: "Did you know? {fact}",
@@ -121,103 +122,76 @@ async function createWidget() {
   try {
     // Pick a random widget message
     const randomWidget = widgetMessages[Math.floor(Math.random() * widgetMessages.length)];
-    
-    // If the message contains a weather placeholder, fetch weather data
     let weatherData = null;
+
+    // If the message contains a weather placeholder, fetch weather data
     if (randomWidget.message.includes("{city}")) {
-      const city = "New York"; // Replace with the desired city
+      const city = "New York"; // Replace with your desired city
       weatherData = await fetchWeather(city); // Fetch the weather data
+      if (!weatherData) {
+        console.error('Failed to fetch weather data');
+        return; // If weather data is not fetched, stop widget creation
+      }
     }
 
     let widget = document.createElement('div');
-    const navHeight = getTopNavHeight();
-    console.log("Navbar height:", navHeight);
-
-    // Set widget styles
     widget.style.position = 'fixed';
-    widget.style.top = '50%'; // Center from top
-    widget.style.left = '50%'; // Center from left
+    widget.style.top = '50%'; // Center vertically
+    widget.style.left = '50%'; // Center horizontally
     widget.style.transform = 'translate(-50%, -50%)'; // Center it
     widget.style.zIndex = '9999';
     widget.style.padding = '20px';
-    widget.style.background = randomWidget.background; // Use the background color from the message
-    widget.style.color = randomWidget.color; // Use the color from the message
+    widget.style.background = randomWidget.background;
+    widget.style.color = randomWidget.color;
     widget.style.fontSize = '18px';
     widget.style.fontWeight = 'bold';
     widget.style.textAlign = 'center';
     widget.style.borderRadius = '15px';
     widget.style.boxShadow = '0px 4px 15px rgba(0, 0, 0, 0.2)';
     widget.style.transition = 'all 0.3s ease-in-out';
-    widget.classList.add('animate__animated', 'animate__fadeInUp', 'animate__delay-1s'); // Add animation
 
-    // If weather data is available, replace the placeholders with real weather info
     if (weatherData) {
       const weatherMessage = randomWidget.message
-        .replace("{city}", "New York")  // Replace with actual city
+        .replace("{city}", "New York")
         .replace("{weather}", weatherData.weather)
         .replace("{temp}", weatherData.temp.toFixed(1));  // Round to 1 decimal place
 
-      // Update the message with weather info
       randomWidget.message = weatherMessage;
     } else {
-      // If no weather data is available, just replace the {fact} placeholder with a random fact
       const fact = getFunFact();
       randomWidget.message = randomWidget.message.replace("{fact}", fact);
     }
 
-    // Add emoji and message
+    // Add emoji and message to widget
     widget.innerHTML = ` 
       <span style="font-size: 30px;">${randomWidget.emoji}</span> <strong>${randomWidget.message}</strong>
       <button type="button" class="close" style="font-size: 28px; color: #ffffff; background: transparent; border: none;">&times;</button>
     `;
 
-    // Add hover effect
-    widget.addEventListener('mouseenter', () => {
-      widget.style.transform = 'scale(1.05)'; // Enlarge on hover
-      widget.style.transition = 'transform 0.3s ease'; // Smooth transition
-    });
-    widget.addEventListener('mouseleave', () => {
-      widget.style.transform = 'scale(1)'; // Return to normal size
-      widget.style.transition = 'transform 0.3s ease'; // Smooth transition
-    });
-
-    // Close button functionality (without animations)
-    const closeButton = widget.querySelector('.close');
-    closeButton.addEventListener('click', () => {
-      console.log('Close button clicked');
-      widget.remove(); // Remove the widget when the close button is clicked
-      console.log('Widget removed from DOM');
-      
-      // Clear the queue
-      widgetQueue = [];
-      
-      // Attempt to show the next widget in the queue
-      showNextWidget();
-    });
-
     // Append the widget to the body
     document.body.appendChild(widget);
     widgetCreated = true; // Mark widget as created
-    console.log('Widget appended to the body.');
 
-    // Set timeout to remove widget after 6 seconds
+    // Remove the widget after 6 seconds
     setTimeout(() => {
-      widget.remove(); // Remove the widget after 6 seconds
-      widgetCreated = false; // Reset widgetCreated flag to false
-      console.log('Widget removed after 6 seconds');
+      widget.remove();
+      widgetCreated = false; // Reset widgetCreated flag
     }, 6000); // 6000 milliseconds = 6 seconds
 
-    // Add widget to the queue
-    widgetQueue.push(widget); // Add to the queue
+    // Close button functionality
+    const closeButton = widget.querySelector('.close');
+    closeButton.addEventListener('click', () => {
+      widget.remove();
+      widgetCreated = false; // Reset widgetCreated flag
+    });
 
-    // Show the next widget in the queue if there is one
-    showNextWidget();
-
-    return widget;
+    console.log('Widget created and appended to the body');
   } catch (error) {
     console.error("Error creating widget:", error);
   }
 }
+
+
 
 function showNextWidget() {
   if (widgetQueue.length > 0) {
